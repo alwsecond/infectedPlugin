@@ -9,7 +9,9 @@ import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
+import org.bukkit.event.player.PlayerRespawnEvent;
 import org.bukkit.inventory.ItemStack;
 import org.bukkit.inventory.PlayerInventory;
 import org.bukkit.plugin.java.JavaPlugin;
@@ -30,6 +32,7 @@ public class shake extends JavaPlugin implements Listener {
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         infectedEvent();
+        bukkitShchedulerInfect();
     }
 
     public void infectedEvent()
@@ -50,14 +53,23 @@ public class shake extends JavaPlugin implements Listener {
                     player.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, particleLocation, 15, dustOptions);
                     player.playSound(player.getLocation(), Sound.BLOCK_SLIME_BLOCK_BREAK, 10, 1);
 
-                    setPlayerSick(player);
-
                     Bukkit.getScheduler().runTaskLater(this, () -> {
                         if (infectedList.contains(player)) setBadEffect(player);
                     }, random(300, 3600)); // 15s - 3min
                 }
             }
         }, 0, random(8400, 12000)); // 7 - 10 min
+    }
+
+    public void bukkitShchedulerInfect()
+    {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
+            for  (int i = 0; i < infectedList.size(); i++)
+            {
+                Player player = infectedList.get(i);
+                setPlayerSick(player);
+            }
+        }, 0, 60);
     }
 
     public void setPlayerSick(Player player)
