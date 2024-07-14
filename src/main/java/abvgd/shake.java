@@ -49,9 +49,14 @@ public class shake extends JavaPlugin implements Listener {
                     Color endColor = Color.fromRGB(0, 180, 0);
                     float size = 2.0F;
                     Particle.DustTransition dustOptions = new Particle.DustTransition(startColor, endColor, size);
+                    Bukkit.getScheduler().runTaskLater(this, () -> {
+                        if (infectedList.contains(player))
+                        {
+                            player.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, particleLocation, 15, dustOptions);
+                            player.playSound(player.getLocation(), Sound.BLOCK_SLIME_BLOCK_BREAK, 10, 1);
+                        }
+                    }, random(300, 3600)); // 15s - 3min
 
-                    player.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, particleLocation, 15, dustOptions);
-                    player.playSound(player.getLocation(), Sound.BLOCK_SLIME_BLOCK_BREAK, 10, 1);
 
                     Bukkit.getScheduler().runTaskLater(this, () -> {
                         if (infectedList.contains(player)) setBadEffect(player);
