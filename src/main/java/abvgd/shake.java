@@ -5,10 +5,13 @@ import org.bukkit.block.Biome;
 import org.bukkit.block.Block;
 import org.bukkit.command.Command;
 import org.bukkit.command.CommandSender;
+import org.bukkit.entity.Entity;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
 import org.bukkit.event.block.BlockPlaceEvent;
+import org.bukkit.event.entity.EntityDamageByEntityEvent;
+import org.bukkit.event.entity.EntityDamageEvent;
 import org.bukkit.event.entity.PlayerDeathEvent;
 import org.bukkit.event.player.PlayerMoveEvent;
 import org.bukkit.event.player.PlayerRespawnEvent;
@@ -26,22 +29,22 @@ public class shake extends JavaPlugin implements Listener {
     List<Player> infectedList = new ArrayList<>();
 
     Random rand = new Random();
-    public int random(int a, int b) { return rand.nextInt(b - a  + 1) + a; }
+
+    public int random(int a, int b) {
+        return rand.nextInt(b - a + 1) + a;
+    }
 
     @Override
     public void onEnable() {
         getServer().getPluginManager().registerEvents(this, this);
         infectedEvent();
-        bukkitShchedulerInfect();
     }
 
-    public void infectedEvent()
-    {
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
-            if (!infectedList.isEmpty())
-            {
-                for (int i = 0; i < infectedList.size(); i++)
-                {
+    public void infectedEvent() {
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () ->
+        {
+            if (!infectedList.isEmpty()) {
+                for (int i = 0; i < infectedList.size(); i++) {
                     Player player = infectedList.get(i);
                     Vector direction = player.getLocation().getDirection();
                     Location particleLocation = player.getLocation().add(direction.multiply(0.3)).add(0, 1.6, 0);
@@ -49,36 +52,27 @@ public class shake extends JavaPlugin implements Listener {
                     Color endColor = Color.fromRGB(0, 180, 0);
                     float size = 2.0F;
                     Particle.DustTransition dustOptions = new Particle.DustTransition(startColor, endColor, size);
-                    Bukkit.getScheduler().runTaskLater(this, () -> {
-                        if (infectedList.contains(player))
-                        {
-                            player.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, particleLocation, 15, dustOptions);
-                            player.playSound(player.getLocation(), Sound.BLOCK_SLIME_BLOCK_BREAK, 10, 1);
-                        }
-                    }, random(300, 3600)); // 15s - 3min
-
-
-                    Bukkit.getScheduler().runTaskLater(this, () -> {
-                        if (infectedList.contains(player)) setBadEffect(player);
-                    }, random(300, 3600)); // 15s - 3min
+                    if (infectedList.contains(player)) {
+                        player.getWorld().spawnParticle(Particle.DUST_COLOR_TRANSITION, particleLocation, 15, dustOptions);
+                        player.playSound(player.getLocation(), Sound.BLOCK_SLIME_BLOCK_BREAK, 10, 1);
+                    }
+                    if (infectedList.contains(player)) setBadEffect(player);
                 }
             }
-        }, 0, random(8400, 12000)); // 7 - 10 min
-    }
-
-    public void bukkitShchedulerInfect()
-    {
-        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () -> {
-            for  (int i = 0; i < infectedList.size(); i++)
+        }, 0, random(8400, 12000));
+        Bukkit.getScheduler().scheduleSyncRepeatingTask(this, () ->
+        {
+            if (!infectedList.isEmpty())
             {
-                Player player = infectedList.get(i);
-                setPlayerSick(player);
+                for (int i = 0; i < infectedList.size(); i++) {
+                    Player player = infectedList.get(i);
+                    setPlayerSick(player);
+                }
             }
         }, 0, 60);
     }
 
-    public void setPlayerSick(Player player)
-    {
+    public void setPlayerSick(Player player) {
         int radius = 3;
         Location playerLocation = player.getLocation();
         List<Player> nearbyPlayers = player.getWorld().getPlayers();
@@ -87,18 +81,15 @@ public class shake extends JavaPlugin implements Listener {
             if (p.equals(player)) {
                 continue;
             }
-            if (p.getLocation().distance(playerLocation) <= radius)
-            {
-                if (!infectedList.contains(p))
-                {
+            if (p.getLocation().distance(playerLocation) <= radius) {
+                if (!infectedList.contains(p)) {
                     if (!inSafeSuit(p)) infectedList.add(p);
                 }
             }
         }
     }
 
-    public boolean inSafeSuit(Player player)
-    {
+    public boolean inSafeSuit(Player player) {
         PlayerInventory inventory = player.getInventory();
 
         ItemStack helmet = inventory.getHelmet();
@@ -107,18 +98,16 @@ public class shake extends JavaPlugin implements Listener {
         ItemStack boots = inventory.getBoots();
 
         if (helmet != null && helmet.getType() == Material.GLASS &&
-        chestplate != null && chestplate.getType() == Material.LEATHER_CHESTPLATE &&
-        leggings != null && leggings.getType() == Material.LEATHER_LEGGINGS &&
-        boots != null && boots.getType() == Material.LEATHER_BOOTS) return true;
+                chestplate != null && chestplate.getType() == Material.LEATHER_CHESTPLATE &&
+                leggings != null && leggings.getType() == Material.LEATHER_LEGGINGS &&
+                boots != null && boots.getType() == Material.LEATHER_BOOTS) return true;
 
         return false;
     }
 
-    public void setBadEffect(Player player)
-    {
+    public void setBadEffect(Player player) {
         int n = random(0, 6);
-        switch (n)
-        {
+        switch (n) {
             case 0:
                 addPotionEffect(player, PotionEffectType.POISON);
                 break;
@@ -143,69 +132,71 @@ public class shake extends JavaPlugin implements Listener {
         }
     }
 
-    public void addPotionEffect(Player player, PotionEffectType potion)
-    {
+    public void addPotionEffect(Player player, PotionEffectType potion) {
         int x = random(200, 800); // 10s - 40s
         player.addPotionEffect(new PotionEffect(potion, x, random(0, 1)));
     }
 
-    public void restoreInfectedPlayer(Player player)
-    {
+    public void restoreInfectedPlayer(Player player) {
         infectedList.remove(player);
         player.setMaxHealth(20);
         player.playSound(player.getLocation(), Sound.ENTITY_VILLAGER_YES, 10, 1);
         player.clearActivePotionEffects();
     }
 
-    public void infectedPlayerEffect(Player player)
-    {
+    public void infectedPlayerEffect(Player player) {
         player.setMaxHealth(14);
         player.setFreezeTicks(500);
         player.addPotionEffect(new PotionEffect(PotionEffectType.POISON, 40, 2));
     }
 
+    @EventHandler
+    public void onEntityDamageByEntity(EntityDamageByEntityEvent e) {
+        Entity entity = e.getEntity();
+        if (e.getDamager() instanceof Player) {
+            Player player = (Player) e.getDamager();
+
+            if (infectedList.contains(player)) {
+                if (player.getInventory().getItemInMainHand().getType() == Material.AIR && !(entity instanceof Player)) {
+                    entity.remove();
+                    player.playSound(player.getLocation(), Sound.ENTITY_GENERIC_EAT, 10, 1);
+                    player.setFoodLevel(player.getFoodLevel() + 2);
+                }
+            }
+        }
+    }
+
     @Override
-    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, String[] args)
-    {
+    public boolean onCommand(@NotNull CommandSender sender, @NotNull Command command, @NotNull String s, String[] args) {
         Player player = (Player) sender;
-        if (command.getName().equals("infect") && sender.isOp())
-        {
-            if (args.length == 1)
-            {
+        if (command.getName().equals("infect") && sender.isOp()) {
+            if (args.length == 1) {
                 String name = args[0];
                 infectedList.add(Bukkit.getPlayer(name));
                 player.sendMessage("§dPlayer: " + name + " was infected!");
                 return true;
-            }
-            else if (args.length == 2) {
+            } else if (args.length == 2) {
                 String name = args[1];
-                if (args[0].equals("event"))
-                {
+                if (args[0].equals("event")) {
                     infectedPlayerEffect(Objects.requireNonNull(Bukkit.getPlayer(name)));
                     player.sendMessage("§a" + name + "§2 get§c infect§2 event!");
-                }
-                else if (args[0].equals("remove"))
-                {
+                } else if (args[0].equals("remove")) {
                     restoreInfectedPlayer(Objects.requireNonNull(Bukkit.getPlayer(name)));
                     player.sendMessage("§a" + name + "§2 was recovered! (removed)");
                 }
 
                 return true;
-            }
-            else {
-                if (!infectedList.isEmpty())
-                {
+            } else {
+                if (!infectedList.isEmpty()) {
                     player.sendMessage("-----INFECTED-----");
-                    for (Player pl : Bukkit.getOnlinePlayers())
-                    {
-                        if (infectedList.contains(pl))
-                        {
+                    for (Player pl : Bukkit.getOnlinePlayers()) {
+                        if (infectedList.contains(pl)) {
                             player.sendMessage(pl.getName());
                         }
                     }
                     player.sendMessage("------------------");
-                }
-                else player.sendMessage("{ empty }"); return true;
+                } else player.sendMessage("{ empty }");
+                return true;
             }
         }
         return false;
