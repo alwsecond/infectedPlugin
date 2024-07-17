@@ -1,5 +1,4 @@
-plugin for minecraft, to give infect use /infect < nick >, to remove /infect restore < nick >, to give player infect complications use /infect event < nick >
-
+plugin for minecraft, to give infect use /infect < nick >, to remove /infect remove < nick >, to give player infect complications use /infect event < nick >, use /infect if you want to see infected players
 # safe suit:
 
 ![image](https://github.com/user-attachments/assets/c426e3e6-7246-4103-9961-5c33c4467fe8)
