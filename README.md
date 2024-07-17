@@ -1,4 +1,4 @@
-plugin for minecraft
+plugin for minecraft, to give infect use /infect <nick>, to remove /infect restore <nick>, to give player infect complications use /infect event <nick>
 
 # safe suit:
 
