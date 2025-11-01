@@ -1,4 +1,17 @@
-plugin for minecraft, to give infect use /infect [player], to remove /infect remove [player], to give player infect complications use /infect event [player], use /infect if you want to see infected players
+## Infection Plugin
+# Minecraft plugin for managing player infections.
+
+Commands:
+
+/infect [player] - Infect player
+
+/infect remove [player] - Remove infection
+
+/infect event [player] - Add complications
+
+/infect - Show infected players
+
+Install: Place JAR in plugins folder and restart server.
 # safe suit:
 
 ![image](https://github.com/user-attachments/assets/c426e3e6-7246-4103-9961-5c33c4467fe8)
